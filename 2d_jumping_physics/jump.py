@@ -1,7 +1,7 @@
 #IMPROVEMENTS
-# 1 - prevent player from being able to jump when below a platform
+# 1 - prevent player from being able to jump when below a platform - Done
 # 2 - horizontal collision - Done 
-# 3 - Put player on platform if just about to make it
+# 3 - Put player on platform if just about to make it - Done
 
 import pgzrun
 from pgzero.builtins import Actor, animate, keyboard, Rect # make linter stop complaining
@@ -55,8 +55,10 @@ def update():
     y_collision = new_player_position_y.colliderect(platform) or y_collision
     x_collision = new_player_position_x.colliderect(platform) or x_collision
     # check if player is above/on the platform
-    if not on_platform:
-      on_platform = y_collision and player.y < platform.y
+    if y_collision and player.y < platform.y:
+      on_platform = True or on_platform
+      # Stick player to ground
+      player.y = platform.y - player.h
 
   # stop falling if colliding
   if y_collision:
