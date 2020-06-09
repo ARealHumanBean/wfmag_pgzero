@@ -1,9 +1,11 @@
 #IMPROVEMENTS
-# 1 - Player can jump even if below a platform?
+# 1 - prevent player from being able to jump when below a platform
 # 2 - horizontal collision - Done 
 # 3 - Put player on platform if just about to make it
 
 import pgzrun
+from pgzero.builtins import Actor, animate, keyboard, Rect # make linter stop complaining
+
 #define screen size
 WIDTH = 800
 HEIGHT = 800
@@ -32,12 +34,14 @@ def update():
   # Collision Check
   newx = player.x
 
+  # Create collision check for player position on the x axis
   x_collision = False
   if keyboard.left:
     newx -= HORIZONTAL_SPEED
     if player.x < 0: x_collision = True
   if keyboard.right:
     newx += HORIZONTAL_SPEED
+    if player.x > 780: x_collision = True
   new_player_position_x = Rect((newx, player.y),(player.w, player.h))
 
   newy = player.y
@@ -46,23 +50,28 @@ def update():
   new_player_position_y = Rect((player.x, newy),(player.w, player.h))
 
   y_collision = False
+  on_platform = False
   for platform in platforms:
     y_collision = new_player_position_y.colliderect(platform) or y_collision
     x_collision = new_player_position_x.colliderect(platform) or x_collision
+    # check if player is above/on the platform
+    if not on_platform:
+      on_platform = y_collision and player.y < platform.y
 
+  # stop falling if colliding
   if y_collision:
     player.y_velocity = 0
   else:
     player.y = newy
 
-  # jump if colliding on y axis
-  if keyboard.space and y_collision: 
+  # press space to jump if on the platform
+  if keyboard.space and on_platform:
     player.y_velocity = player.jump_velocity
 
-  # Move if the player will not collide horizontally
-  if keyboard.left and not x_collision and player.x > 0:
+  # press left or right and the player will move unless colliding horizontally
+  if keyboard.left and not x_collision:
     player.x = newx
-  elif keyboard.right and not x_collision and player.x < 780:
+  elif keyboard.right and not x_collision:
     player.x = newx
 
 def draw():
